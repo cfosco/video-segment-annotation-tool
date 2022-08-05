@@ -173,6 +173,8 @@ class Experiment extends Component {
     };
 
 
+    this.videoRef = React.createRef();
+
     this._loadNextVideo = this._loadNextVideo.bind(this);
     this._loadNextLevel = this._loadNextLevel.bind(this);
 
@@ -222,7 +224,9 @@ class Experiment extends Component {
 
 
 
-    
+    const video = this.videoRef.current;
+
+
     // We need the metadata 'duration', so we wrap the code in an event listener to be sure we execute our code when the metadata is loaded
     video.addEventListener('loadedmetadata', function () {
       // Get the dimension of the progress-bar
@@ -250,7 +254,7 @@ class Experiment extends Component {
 
       // Function to draw the markers
       function setMarkers(markers, ratioPxSec, height) {
-          for (marker in markers) {
+          for (const marker in markers) {
               let x = markers[marker][0] * ratioPxSec; // Start x position of the marker
               let y = 0; // Start y position of the marker
               let w = (markers[marker][1] - markers[marker][0]) * ratioPxSec; // Width of the marker
@@ -599,8 +603,9 @@ class Experiment extends Component {
                 <div className={classes.videoContainer}
                      style={{width: videoSize, height: videoSize}}>
                   <video
-                    preload="auto"
                     id="main-video"
+                    ref={this.videoRef}
+                    preload="auto"
                     style={{height: videoSize}}
                     src={MEMENTO_HOST_PREFIX+currentVideo}
                     type="video/mp4"
@@ -612,6 +617,9 @@ class Experiment extends Component {
                     // onEnded={this._onVideoEnd}
                     // onLoadedData={this._onLoadedVideo}
                     />
+                  <div class="controls">
+                    <progress class="progress-bar" style="object-fit:cover; z-index=10000" min="0" max="100" value="0">0% played</progress>
+                  </div>
                 </div>
                 
               </div>
