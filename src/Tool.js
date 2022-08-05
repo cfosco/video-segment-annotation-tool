@@ -8,9 +8,9 @@ import 'rc-slider/assets/index.css';
 import { Progress } from 'react-sweet-progress';
 import "react-sweet-progress/lib/style.css";
 
-import PlusIcon from './plus.png';
-import PlusIconBig from './plus_big.png';
-import tmp from './jsons/EEG_videos_sub_1.json';
+// import PlusIcon from './plus.png';
+// import PlusIconBig from './plus_big.png';
+import tmp from './jsons/test.json';
 import $ from 'jquery';
 
 import { Dropbox } from 'dropbox';
@@ -115,6 +115,16 @@ const styles = theme => ({
     alignItems: 'center',
     width: '100%',
   },
+  
+  
+  markers: {
+    position: 'absolute',
+    bottom: '10%',
+    marginLeft: '28%',
+    borderRadius: '9px',
+    pointerEvents: 'none',
+  }
+
 });
 
 const Handle = Slider.Handle;
@@ -142,7 +152,7 @@ class Experiment extends Component {
       buttonText: 'START',
       currentLevel: 1,
       currentVideoIndex: 1,
-      currentVideo: tmp["level0"][0],
+      currentVideo: tmp["level0"][0].url,
       overclick: false,
       percentLevelCompletion: Math.round(Math.min((0) / tmp["level0"].length * 100, 100)),
       showGame: false,
@@ -159,6 +169,7 @@ class Experiment extends Component {
       maxVideos: tmp["level0"].length,
       responseButtonDisabled: false,
       mainButtonDisabled: false,
+      currentGoal: tmp["level0"][0].goal
     };
 
 
@@ -208,6 +219,51 @@ class Experiment extends Component {
     }
     console.log("Using the following video data for this HIT: ", this.state.videoData);
     document.getElementById('instruction-button').click();
+
+
+
+    
+    // We need the metadata 'duration', so we wrap the code in an event listener to be sure we execute our code when the metadata is loaded
+    video.addEventListener('loadedmetadata', function () {
+      // Get the dimension of the progress-bar
+      const progressbar = document.getElementById('progress-bar');
+      const widthProgressBar = window.getComputedStyle(progressbar, null).getPropertyValue("width");
+      const heightProgressBar = window.getComputedStyle(progressbar, null).getPropertyValue("height");
+      // Create the canvas
+      const canvas = document.createElement('canvas');
+      const w = canvas.width = parseFloat(widthProgressBar);
+      const h = canvas.height = parseFloat(heightProgressBar);
+      canvas.id = 'markers';
+      const progressBar = document.getElementById("progress-bar");
+      // Insert the canvas in the DOM
+      progressBar.parentNode.insertBefore(canvas, progressBar.nextSibling)
+      // Define the context
+      const ctx = canvas.getContext('2d');
+      // Calcul how many px will represent 1s
+      const videoDuration = video.duration;
+      const ratioPxBySeconds = parseFloat(w) / videoDuration;
+      // Define the markers
+      const markers = {
+          'marker1': [2, 5],
+          'marker2': [7, 8]
+      };
+
+      // Function to draw the markers
+      function setMarkers(markers, ratioPxSec, height) {
+          for (marker in markers) {
+              let x = markers[marker][0] * ratioPxSec; // Start x position of the marker
+              let y = 0; // Start y position of the marker
+              let w = (markers[marker][1] - markers[marker][0]) * ratioPxSec; // Width of the marker
+              let h = parseFloat(height); // Height of the marker
+              ctx.fillStyle = "#7f3302"; // Set the color of the marker
+              ctx.fillRect(x, y, w, h); // Draw a rectangle
+          }
+      }
+
+      setMarkers(markers, ratioPxBySeconds, h); // Call the function
+    });
+
+
   }
 
   componentDidUpdate(){}
@@ -487,7 +543,7 @@ class Experiment extends Component {
       <div className={classes.root}>
         <div className={classes.progressSection}>
           <Typography variant="h2" gutterBottom align="center" style={{fontSize: "40px"}}>
-            Video Memory Experiment
+            Goal Grounding Experiment
           </Typography>
           <Button id="instruction-button" variant="contained" color="primary" onClick={this._handleClick}>Instructions</Button>
           <Popover
@@ -507,7 +563,7 @@ class Experiment extends Component {
           >
             <Typography variant="subtitle1" align="center" style={{padding: 32}}>
               <b>Instructions:</b> 
-              You will be shown a sequence of videos. Your task is to press SPACEBAR when you see a video that you recognize from before.
+              You will be shown a first-person video and a written goal. Your task is to select all temporal segments in the video were the person is actively working towards the goal.
 
             </Typography>
           </Popover>
@@ -544,26 +600,31 @@ class Experiment extends Component {
                      style={{width: videoSize, height: videoSize}}>
                   <video
                     preload="auto"
-                    poster={PlusIconBig}
                     id="main-video"
                     style={{height: videoSize}}
                     src={MEMENTO_HOST_PREFIX+currentVideo}
                     type="video/mp4"
-                    autoPlay
                     loop
                     muted
                     onLoadStart={() => {
                       console.log('...I am loading...')
                     }}
-                    onEnded={this._onVideoEnd}
-                    onLoadedData={this._onLoadedVideo}
+                    // onEnded={this._onVideoEnd}
+                    // onLoadedData={this._onLoadedVideo}
                     />
                 </div>
                 
               </div>
             </React.Fragment>
-
+            
           }
+
+          <Typography variant="subtitle1" align="center">
+            <b>Goal:</b> {this.state.currentGoal}
+          </Typography>
+
+
+          
           {/* {
             showQuestion && !showSubmit &&
 
