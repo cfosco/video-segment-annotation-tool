@@ -161,13 +161,11 @@ class Experiment extends Component {
       showButton: false,
       startLoadingVideo: false,
       time: performance.now(),
-      timer: performance.now(),
       responses: [],
-      videoSize: 360,
+      videoSize: 512,
       videoData: tmp,
       maxLevels: Object.keys(tmp).length,
       maxVideos: tmp["level0"].length,
-      responseButtonDisabled: false,
       mainButtonDisabled: false,
       currentGoal: tmp["level0"][0].goal
     };
@@ -185,8 +183,8 @@ class Experiment extends Component {
     this._handleStartButton = this._handleStartButton.bind(this);
     this._handleSubmitButton = this._handleSubmitButton.bind(this);
     this._gup = this._gup.bind(this);
-    this._submitHITform = this._submitHITform.bind(this);
-    this._addHiddenField = this._addHiddenField.bind(this);
+    // this._submitHITform = this._submitHITform.bind(this);
+    // this._addHiddenField = this._addHiddenField.bind(this);
     this._onLoadedVideo = this._onLoadedVideo.bind(this);
     this._onVideoEnd = this._onVideoEnd.bind(this);
   }
@@ -217,8 +215,9 @@ class Experiment extends Component {
       })
     }
     else {
-      console.log("USING DEFAULT JSON FILE (./jsons/EEG_videos_sub_1.json)");
+      console.log("USING DEFAULT JSON FILE: "+tmp);
     }
+
     console.log("Using the following video data for this HIT: ", this.state.videoData);
     document.getElementById('instruction-button').click();
 
@@ -226,46 +225,45 @@ class Experiment extends Component {
 
     const video = this.videoRef.current;
 
-
     // We need the metadata 'duration', so we wrap the code in an event listener to be sure we execute our code when the metadata is loaded
-    video.addEventListener('loadedmetadata', function () {
-      // Get the dimension of the progress-bar
-      const progressbar = document.getElementById('progress-bar');
-      const widthProgressBar = window.getComputedStyle(progressbar, null).getPropertyValue("width");
-      const heightProgressBar = window.getComputedStyle(progressbar, null).getPropertyValue("height");
-      // Create the canvas
-      const canvas = document.createElement('canvas');
-      const w = canvas.width = parseFloat(widthProgressBar);
-      const h = canvas.height = parseFloat(heightProgressBar);
-      canvas.id = 'markers';
-      const progressBar = document.getElementById("progress-bar");
-      // Insert the canvas in the DOM
-      progressBar.parentNode.insertBefore(canvas, progressBar.nextSibling)
-      // Define the context
-      const ctx = canvas.getContext('2d');
-      // Calcul how many px will represent 1s
-      const videoDuration = video.duration;
-      const ratioPxBySeconds = parseFloat(w) / videoDuration;
-      // Define the markers
-      const markers = {
-          'marker1': [2, 5],
-          'marker2': [7, 8]
-      };
+    // video.addEventListener('loadedmetadata', function () {
+    //   // Get the dimension of the progress-bar
+    //   const progressbar = document.getElementById('progress-bar');
+    //   const widthProgressBar = window.getComputedStyle(progressbar, null).getPropertyValue("width");
+    //   const heightProgressBar = window.getComputedStyle(progressbar, null).getPropertyValue("height");
+    //   // Create the canvas
+    //   const canvas = document.createElement('canvas');
+    //   const w = canvas.width = parseFloat(widthProgressBar);
+    //   const h = canvas.height = parseFloat(heightProgressBar);
+    //   canvas.id = 'markers';
+    //   const progressBar = document.getElementById("progress-bar");
+    //   // Insert the canvas in the DOM
+    //   progressBar.parentNode.insertBefore(canvas, progressBar.nextSibling)
+    //   // Define the context
+    //   const ctx = canvas.getContext('2d');
+    //   // Calcul how many px will represent 1s
+    //   const videoDuration = video.duration;
+    //   const ratioPxBySeconds = parseFloat(w) / videoDuration;
+    //   // Define the markers
+    //   const markers = {
+    //       'marker1': [2, 5],
+    //       'marker2': [7, 8]
+    //   };
 
-      // Function to draw the markers
-      function setMarkers(markers, ratioPxSec, height) {
-          for (const marker in markers) {
-              let x = markers[marker][0] * ratioPxSec; // Start x position of the marker
-              let y = 0; // Start y position of the marker
-              let w = (markers[marker][1] - markers[marker][0]) * ratioPxSec; // Width of the marker
-              let h = parseFloat(height); // Height of the marker
-              ctx.fillStyle = "#7f3302"; // Set the color of the marker
-              ctx.fillRect(x, y, w, h); // Draw a rectangle
-          }
-      }
+    //   // Function to draw the markers
+    //   function setMarkers(markers, ratioPxSec, height) {
+    //       for (const marker in markers) {
+    //           let x = markers[marker][0] * ratioPxSec; // Start x position of the marker
+    //           let y = 0; // Start y position of the marker
+    //           let w = (markers[marker][1] - markers[marker][0]) * ratioPxSec; // Width of the marker
+    //           let h = parseFloat(height); // Height of the marker
+    //           ctx.fillStyle = "#7f3302"; // Set the color of the marker
+    //           ctx.fillRect(x, y, w, h); // Draw a rectangle
+    //       }
+    //   }
 
-      setMarkers(markers, ratioPxBySeconds, h); // Call the function
-    });
+    //   setMarkers(markers, ratioPxBySeconds, h); // Call the function
+    // });
 
 
   }
@@ -304,11 +302,13 @@ class Experiment extends Component {
 
     console.log("entering _handleStartButton")
 
+    setTimeout(() => this.setState({showGame: true, mainButtonDisabled: true, buttonText: 'NEXT'}), 200);
 
-    this.setState({mainButtonDisabled: true, buttonText: "3 | Please focus on the fixation cross"});
-    setTimeout(() => this.setState({buttonText: "2 | Please focus on the fixation cross"}), 1000);
-    setTimeout(() => this.setState({buttonText: "1 | Please focus on the fixation cross"}), 2000);
-    setTimeout(() => this.setState({showGame: true, buttonText: 'NEXT LEVEL', timer: performance.now()}), 3000);
+
+    // this.setState({mainButtonDisabled: true, buttonText: "3 | Please focus on the fixation cross"});
+    // setTimeout(() => this.setState({buttonText: "2 | Please focus on the fixation cross"}), 1000);
+    // setTimeout(() => this.setState({buttonText: "1 | Please focus on the fixation cross"}), 2000);
+    // setTimeout(() => this.setState({showGame: true, buttonText: 'NEXT LEVEL'}), 3000);
   }
 
   // _handleFakeButton() {
@@ -397,34 +397,40 @@ class Experiment extends Component {
     }
   }
 
-  _submitHITform() {
-    // this.setState({disabled: true, overclick: true});
-    var submitUrl = decodeURIComponent(this._gup("turkSubmitTo")) + MTURK_SUBMIT_SUFFIX;
-    var form = $("#submit-form");
 
-    console.log("submitUrl: ", submitUrl);
-    console.log("Gup output for assignmentId, workerId:", this._gup("assignmentId"),this._gup("workerId"))
+  // ================================= STUFF FOR MTURK ===================================
 
-    this._addHiddenField(form, 'assignmentId', this._gup("assignmentId"));
-    this._addHiddenField(form, 'workerId', this._gup("workerId"));
-    this._addHiddenField(form, 'json', this._gup(JSON_IDENTIFIER));
-    // this._addHiddenField(form, 'taskTime', (Date.now() - this.state.timer)/1000);
-    // this._addHiddenField(form, 'feedback', $("#feedback-input").val());
-    this._addHiddenField(form, 'results', JSON.stringify(this.state.responses));
-    // $("#submit-form").attr("action", submitUrl);
-    // $("#submit-form").attr("method", "POST");
-    // $("#submit-form").submit();
-  }
+  // _submitHITform() {
+  //   // this.setState({disabled: true, overclick: true});
+  //   var submitUrl = decodeURIComponent(this._gup("turkSubmitTo")) + MTURK_SUBMIT_SUFFIX;
+  //   var form = $("#submit-form");
 
-  _addHiddenField(form, name, value) {
-    // form is a jQuery object, name and value are strings
-    var input = $("<input type='hidden' name='" + name + "' value=''>");
-    input.val(value);
-    form.append(input);
-  }
+  //   console.log("submitUrl: ", submitUrl);
+  //   console.log("Gup output for assignmentId, workerId:", this._gup("assignmentId"),this._gup("workerId"))
+
+  //   this._addHiddenField(form, 'assignmentId', this._gup("assignmentId"));
+  //   this._addHiddenField(form, 'workerId', this._gup("workerId"));
+  //   this._addHiddenField(form, 'json', this._gup(JSON_IDENTIFIER));
+  //   // this._addHiddenField(form, 'taskTime', (Date.now() - this.state.timer)/1000);
+  //   // this._addHiddenField(form, 'feedback', $("#feedback-input").val());
+  //   this._addHiddenField(form, 'results', JSON.stringify(this.state.responses));
+  //   // $("#submit-form").attr("action", submitUrl);
+  //   // $("#submit-form").attr("method", "POST");
+  //   // $("#submit-form").submit();
+  // }
+
+  // _addHiddenField(form, name, value) {
+  //   // form is a jQuery object, name and value are strings
+  //   var input = $("<input type='hidden' name='" + name + "' value=''>");
+  //   input.val(value);
+  //   form.append(input);
+  // }
+
+  // ====================================================================================
+
 
   _loadNextVideo() {
-    // Loads next video after the previous video played for 3 seconds
+    // Loads next video
 
     if (Math.round(this.state.percentLevelCompletion) >= 100) {
       this.setState({percentLevelCompletion: 100});
@@ -458,7 +464,6 @@ class Experiment extends Component {
     setTimeout(() => this.setState({buttonText: "1 | Please focus on the fixation cross"}), 2000);
     setTimeout(() => this.setState({
       showGame: true,
-      timer: performance.now(),
       // currentVideo: videoData["url"],
       // currentVideoInterval: videoData["time"],
       // currentVideoLabel: videoData["label"],
@@ -475,19 +480,16 @@ class Experiment extends Component {
     document.addEventListener("keydown", this._handleKeyDown);
   }
 
+
   _onLoadedVideo() {
     // This is called when the video is loaded
     console.log('Video is loaded!')
-    // this.state.currentVideoIndex = this.state.currentVideoIndex + 1;
-    // this.setState({currentVideoIndex: this.state.currentVideoIndex + 1})
   
   }
 
   _onVideoEnd() {
     // This is called when the video ends
     console.log('Video ended!')
-    this._loadNextVideo()
-    // setTimeout(() => this._loadNextVideo(), 50);
 
   }
 
@@ -498,7 +500,6 @@ class Experiment extends Component {
       percentLevelCompletion: 0,
       showGame: true,
       buttonText: 'NEXT LEVEL',
-      timer: performance.now(),
       showSubmit: false,
       currentVideoIndex: 0,
       mainButtonDisabled: true,
@@ -509,7 +510,8 @@ class Experiment extends Component {
   _handleKeyDown = (event) => {
     document.removeEventListener("keydown", this._handleKeyDown);
 
-    if (this.state.percent === 100) { return; }
+    // if (this.state.percent === 100) { return; }
+
     switch(event.keyCode) {
       case 32:  // SPACEBAR
         this._handleSpacebar();
@@ -523,7 +525,7 @@ class Experiment extends Component {
   _handleSpacebar() {
 
     // Push recognized response
-    this.state.responses.push({'video': this.state.currentVideo, 'sequence_position': this.state.currentVideoIndex, 'response_time': performance.now() - this.state.timer});
+    this.state.responses.push({'video': this.state.currentVideo, 'sequence_position': this.state.currentVideoIndex});
     console.log("SPACEBAR")
     // this.setState({
     //   left: true,
@@ -532,12 +534,14 @@ class Experiment extends Component {
     setTimeout(() => this._loadNextVideo(), 200);
   }
 
+  
+
 
   render() {
     const {classes} = this.props;
     const { buttonText, currentLevel,
             percentLevelCompletion, showGame, showSubmit, showButton,
-            currentVideo, responseButtonDisabled, mainButtonDisabled,
+            currentVideo, mainButtonDisabled,
             videoSize, videoDistance, showEnd,
             maxLevels, maxVideos, anchorEl } = this.state;
     const open = Boolean(anchorEl);
@@ -607,7 +611,7 @@ class Experiment extends Component {
                     ref={this.videoRef}
                     preload="auto"
                     style={{height: videoSize}}
-                    src={MEMENTO_HOST_PREFIX+currentVideo}
+                    src={currentVideo} //{MEMENTO_HOST_PREFIX+currentVideo}
                     type="video/mp4"
                     loop
                     muted
@@ -617,8 +621,8 @@ class Experiment extends Component {
                     // onEnded={this._onVideoEnd}
                     // onLoadedData={this._onLoadedVideo}
                     />
-                  <div class="controls">
-                    <progress class="progress-bar" style="object-fit:cover; z-index=10000" min="0" max="100" value="0">0% played</progress>
+                  <div className="controls">
+                    <progress className="progress-bar" style={{objectFit: "cover", zIndex: "10000"}} min="0" max= "100" value="0">0% played</progress>
                   </div>
                 </div>
                 

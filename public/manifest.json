@@ -1,6 +1,6 @@
 {
-  "short_name": "video_memory_experiment",
-  "name": "Video Memory Experiment",
+  "short_name": "video_segment_annotation_tool",
+  "name": "Video Segment Annotation Tool",
   "icons": [
   ],
   "start_url": ".",
